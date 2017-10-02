@@ -23,8 +23,6 @@ const unsigned char zxprog[]={};
 unsigned char kbd_table[8];		// 0->FE, 1=>FD, .. 7=>7F
 volatile unsigned int slow=0;
 bool shift = 0;
-int keycol=0;
-int lcnt = 0;
 
 Z80_STATE state;
 char conv[]=" ..........\"$$:?()<>=+-*/;,.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -51,8 +49,7 @@ void keyConversion(char c){
     }else{
        kbd_table[0]=255;                                    
     }  
-    if (c == '#'){
-        keycol=0;       
+    if (c == '#'){        
         if (!shift){
            
                 shift= 1;
@@ -61,174 +58,135 @@ void keyConversion(char c){
                 shift=0;
         }        
     }
-    if (c == 'z'){
-        keycol=0;
+    if (c == 'z'){        
          kbd_table[0]=253;         
     }
-    if (c == 'x'){
-        keycol=0;       
+    if (c == 'x'){              
          kbd_table[0]=251;         
     }
-    if (c == 'c'){
-        keycol=0;        
+    if (c == 'c'){               
          kbd_table[0]=247;         
     }
-    if (c == 'v'){
-        keycol=0;        
+    if (c == 'v'){               
          kbd_table[0]=239;         
     }
   
     //line 1  'a':(1,254), 's':(1,253), 'd':(1,251), 'f':(1,247), 'g':(1,239),
-    if (c == 'a'){
-        keycol=1;
+    if (c == 'a'){        
         kbd_table[1]=254;         
     }
-    if (c == 's'){
-        keycol=1;
+    if (c == 's'){        
          kbd_table[1]=253;         
     }
-    if (c == 'd'){
-        keycol=1;
+    if (c == 'd'){        
         kbd_table[1]=251;         
     }
-    if (c == 'f'){
-        keycol=1;
+    if (c == 'f'){        
         kbd_table[1]=247;         
     }
-    if (c == 'g'){
-        keycol=1;
+    if (c == 'g'){        
         kbd_table[1]=239;         
     }
     
     //line 2  'q':(2,254), 'w':(2,253), 'e':(2,251), 'r':(2,247), 't':(2,239),
-    if (c == 'q'){
-        keycol=2;
+    if (c == 'q'){        
         kbd_table[2]=254;         
     }
-    if (c == 'w'){
-        keycol=2;
+    if (c == 'w'){        
         kbd_table[2]=253;         
     }
-    if (c == 'e'){
-        keycol=2;
+    if (c == 'e'){        
         kbd_table[2]=251;         
     }
-    if (c == 'r'){
-        keycol=2;
+    if (c == 'r'){        
         kbd_table[2]=247;         
     }
-    if (c == 't'){
-        keycol=2;
+    if (c == 't'){        
         kbd_table[2]=239;         
     }
 
     //line 3  '1':(3,254), '2':(3,253), '3':(3,251), '4':(3,247), '5':(3,239),
-    if (c == '1'){
-        keycol=3;
+    if (c == '1'){        
         kbd_table[3]=254;         
     }
-    if (c == '2'){
-        keycol=3;
+    if (c == '2'){        
         kbd_table[3]=253;        
     }
     if (c == '3'){
-        keycol=3;
         kbd_table[3]=251;         
     }
-    if (c == '4'){
-        keycol=3;
+    if (c == '4'){        
         kbd_table[3]=247;         
     }
-    if (c == '5'){
-        keycol=3;
+    if (c == '5'){        
         kbd_table[3]=239;         
     }     
     
     //line 4 '0':(4,254), '9':(4,253), '8':(4,251), '7':(4,247), '6':(4,239),
-    if (c == '0'){
-        keycol=4;
+    if (c == '0'){        
         kbd_table[4]=254;         
     }
-    if (c == '9'){
-        keycol=4;
+    if (c == '9'){        
         kbd_table[4]=253;         
     }
-    if (c == '8'){
-        keycol=4;
+    if (c == '8'){        
         kbd_table[4]=251;         
     }
-    if (c == '7'){
-        keycol=4;
+    if (c == '7'){        
         kbd_table[4]=247;         
     }
-    if (c == '6'){
-        keycol=4;
+    if (c == '6'){       
         kbd_table[4]=239;         
     }     
     
     //line 5 'p':(5,254), 'o':(5,253), 'i':(5,251), 'u':(5,247), 'y':(5,239),
     if (c == 'p'){
         uBit.display.print("*");
-        keycol=5;
         kbd_table[5]=254;
         
     }
-    if (c == 'o'){
-        keycol=5;
+    if (c == 'o'){        
         kbd_table[5]=253;    
     }
-    if (c == 'i'){
-        keycol=5;
+    if (c == 'i'){        
         kbd_table[5]=251;        
     }
-    if (c == 'u'){
-        keycol=5;
+    if (c == 'u'){        
         kbd_table[5]=247;        
     }
-    if (c == 'y'){
-        keycol=5;
+    if (c == 'y'){        
         kbd_table[5]=239;
     }          
     //line 6 '\n':(6,254),'l':(6,253), 'k':(6,251), 'j':(6,247), 'h':(6,239),
-    if (c == 0x0d){
-        keycol=6;        
+    if (c == 0x0d){               
         kbd_table[6]=254;         
     }
-    if (c == 'l'){
-        keycol=6;
+    if (c == 'l'){        
         kbd_table[6]=253;         
     }
-    if (c == 'k'){
-        keycol=6;
+    if (c == 'k'){        
         kbd_table[6]=251;         
     }
     if (c == 'j'){
-        keycol=6;
         kbd_table[6]=247;
     }
-    if (c == 'h'){
-        keycol=6;
+    if (c == 'h'){        
         kbd_table[6]=239;    
     }               
     //line 7 ' ':(7,254), '.':(7,253), 'm':(7,251), 'n':(7,247), 'b':(7,239)
-    if (c == ' '){
-        keycol=7;
+    if (c == ' '){        
         kbd_table[7]=254;         
     }
-    if (c == '.'){
-        keycol=7;
+    if (c == '.'){        
         kbd_table[7]=253;         
     }
-    if (c == 'm'){
-        keycol=7;
+    if (c == 'm'){        
         kbd_table[7]=251;         
     }
-    if (c == 'n'){
-        keycol=7;
+    if (c == 'n'){        
         kbd_table[7]=247;         
     }
-    if (c == 'b'){
-        keycol=7;
+    if (c == 'b'){        
         kbd_table[7]=239;         
     }               
     
