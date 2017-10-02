@@ -1,0 +1,11 @@
+{
+  "name": "calliopei-zx81",
+  "version": "1.0.0",
+  "description": "ZX81 emulator for calliope",
+  "license": "GPL 3.0",
+  "dependencies": {
+      "microbit": "calliope-mini/microbit#v2.0.0-rc7-calliope-1.0.1"
+    },
+  "targetDependencies": {},
+  "bin": "./source"
+}
