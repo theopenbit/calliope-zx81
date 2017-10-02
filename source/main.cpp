@@ -44,11 +44,7 @@ void keyConversion(char c){
 */
    
     //line 0 '/':(0,254), 'z':(0,253), 'x':(0,251), 'c':(0,247), 'v':(0,239),
-    if (shift){
-       kbd_table[0]=254;                            
-    }else{
-       kbd_table[0]=255;                                    
-    }  
+      
     if (c == '#'){        
         if (!shift){
            
@@ -70,7 +66,11 @@ void keyConversion(char c){
     if (c == 'v'){               
          kbd_table[0]=239;         
     }
-  
+    if (shift){
+       kbd_table[0]=kbd_table[0] & 254;                            
+    }else{
+       kbd_table[0]=kbd_table[0] & 255;                                    
+    }
     //line 1  'a':(1,254), 's':(1,253), 'd':(1,251), 'f':(1,247), 'g':(1,239),
     if (c == 'a'){        
         kbd_table[1]=254;         
