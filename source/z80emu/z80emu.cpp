@@ -14,7 +14,68 @@
 #include "macros.h"
 #include "tables.h"
 
+#include "./slotmachines.h"
+#include "./sinus.h"
+#include "./demo.h"
+#include "./fibonacci.h"
+
 extern unsigned char kbd_table[];
+extern char prog_to_load;
+
+void load_prog_slotmachine()
+{
+   
+  for(int i=0;i<ZXPROG_LG;i++){     
+      Z80_WRITE_BYTE(0x4009+i,zxprog[i]);  
+  }
+  
+}
+
+void load_prog_fibonacci()
+{
+   
+  for(int i=0;i<ZXPROG_FIB_LG;i++){     
+      Z80_WRITE_BYTE(0x4009+i,zxprog_fib[i]);  
+  }
+  
+}
+
+void load_prog_sinus()
+{
+   
+  for(int i=0;i<ZXPROG_SINUS_LG;i++){     
+      Z80_WRITE_BYTE(0x4009+i,zxprog_sinus[i]);  
+  }
+  
+}
+
+void load_prog_demo()
+{
+   
+  for(int i=0;i<ZXPROG_DEMO_LG;i++){     
+      Z80_WRITE_BYTE(0x4009+i,zxprog_demo[i]);  
+  }
+  
+}
+
+
+void load_prog()
+{
+   
+  if (prog_to_load == '0'){
+      load_prog_demo();
+  }
+  if (prog_to_load == '1'){
+      load_prog_slotmachine();
+  }
+  if (prog_to_load == '2'){
+      load_prog_sinus();
+  }
+  if (prog_to_load == '3'){
+      load_prog_fibonacci();
+  }
+  
+}
 
 /* Indirect (HL) or prefixed indexed (IX + d) and (IY + d) memory operands are
  * encoded using the 3 bits "110" (0x06).
@@ -274,7 +335,12 @@ static int emulate (Z80_STATE * state, int number_cycles, int opcode)
                 Z80_FETCH_BYTE(pc, opcode);
 
 
-		/*tsc if (pc==0x347) {load_prog(); pc=0x207; Z80_FETCH_BYTE(pc, opcode);}*/
+		/*patch firmware in order to load a program on basic load ""*/
+                 if (pc==0x347) {
+                     load_prog(); 
+                     pc=0x207; 
+                     Z80_FETCH_BYTE(pc, opcode);                     
+                 }
 
                 pc++;
 

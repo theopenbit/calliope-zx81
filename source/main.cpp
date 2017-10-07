@@ -14,20 +14,27 @@
 MicroBit uBit;
 unsigned char RAM[RAMSIZE];
 const unsigned char ROM81[8192]={
-#include "../open81.h"
+#include "./open81.h"
 };
-#define ZXPROG_LG 0
-const unsigned char zxprog[]={};
-//#include "../zxgal.h"
 
 unsigned char kbd_table[8];		// 0->FE, 1=>FD, .. 7=>7F
 volatile unsigned int slow=0;
 bool shift = 0;
+bool dumpmode=0;
+char prog_to_load=0;
 
 Z80_STATE state;
 char conv[]=" ..........\"$$:?()<>=+-*/;,.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-unsigned char output[35];
+unsigned char output[300];//35
 
+
+void charToHex(char byte, char *hexstr)
+{    
+    int a = byte&0x0f;
+    int b = (byte>>4)&0x0f;
+    hexstr[0] = (b<10)?48+b:65+(b-10);    
+    hexstr[1] = (a<10)?48+a:65+(a-10);
+}
 
 void keyConversion(char c){
 /*
@@ -192,22 +199,12 @@ void keyConversion(char c){
     
 }
 
-void load_prog()
-{
-  
-  for(int i=0;i<ZXPROG_LG;i++){
-      Z80_WRITE_BYTE(0x4009+i,zxprog[i]);
-
-  }
-  uBit.serial.send("Prog. loaded\r\n");
-}
 
 void displayLoop(){
-    //display            
-    
-        unsigned int startAddress;
+        //display                    
+        int startAddress;
         Z80_FETCH_WORD(0x400c, startAddress);
-        uBit.serial.send("\033[2J");       
+        uBit.serial.send("\033[2J");               
         int c=0;
         Z80_READ_BYTE(startAddress,c);
         if (c==118){
@@ -223,7 +220,27 @@ void displayLoop(){
                     startAddress++;
                     break;
                 }
-                output[outpos]=conv[c&63];                
+                if(c&128){
+                    output[outpos]='\33';                
+                    outpos++;
+                    output[outpos]='[';                
+                    outpos++;
+                    output[outpos]='7';                
+                    outpos++;
+                    output[outpos]='m';                
+                    outpos++;
+                    output[outpos]=conv[c&63];  
+                    outpos++;
+                    output[outpos]='\33';                
+                    outpos++;
+                    output[outpos]='[';                
+                    outpos++;
+                    output[outpos]='0';                
+                    outpos++;
+                    output[outpos]='m';                                    
+                }else{
+                    output[outpos]=conv[c&63];                
+                }
                 startAddress++;
                 outpos++;
             }
@@ -244,11 +261,54 @@ void emulationLoop(){
             uBit.sleep(15); 
                 
         } else {
-                Z80Emulate(&state, 100000);
+            Z80Emulate(&state, 100000);
         }
      
     
 }
+
+void dumpRam(){
+    //dump the basic program 
+    uBit.serial.send("\033[2J");           
+    int startAddress = 0x4009;    
+    int endAddress;    
+    int i = 0;    
+    Z80_FETCH_WORD(0x4014, endAddress);    
+    int proglength = endAddress-startAddress;
+    uBit.serial.send(proglength);
+    uBit.serial.send("\r\n");
+    while (startAddress < endAddress){
+        unsigned char b;
+        Z80_READ_BYTE(startAddress,b);
+        char hexstr [3]={0,0,0};               
+        charToHex(b, hexstr);
+        uBit.serial.send("0x");  
+        uBit.serial.send(hexstr);  
+        uBit.serial.send(", "); 
+        startAddress++;
+        if(i == 9){
+           uBit.serial.send("\r\n");
+           i=0;
+        }else{
+            i++;
+        }
+    }
+}
+
+void displayProgamMenu(){
+    uBit.serial.send("\033[2J"); 
+    uBit.serial.send("################################################################\r\n"); 
+    uBit.serial.send("##   Choose program that will be loaded on 'LOAD ""' command  ##\r\n"); 
+    uBit.serial.send("################################################################\r\n");
+    uBit.serial.send("##   0 - DEMO Screen 'Calliope goes ZX81'                     ##\r\n"); 
+    uBit.serial.send("##   1 - Game 'Slotmachine'                                   ##\r\n"); 
+    uBit.serial.send("##   2 - Sinus curve                                          ##\r\n"); 
+    uBit.serial.send("##   3 - Fibonacci numbers                                    ##\r\n"); 
+    uBit.serial.send("################################################################\r\n"); 
+    prog_to_load = uBit.serial.read(1).charAt(0);
+    
+}
+
 
 void keyboardLoop(){
     
@@ -265,26 +325,49 @@ void keyboardLoop(){
         } else if(data =='-'){
             uBit.display.print("slow mode");                
             slow=1;
-        } else{
-            if(data >0){
+        } else if(data == '^'){
+            if(dumpmode){
+                uBit.display.print("stop dump mode");
+                dumpmode=0;
+            }else{
+                uBit.display.print("start dump mode");
+                dumpmode=1;
+                dumpRam();
+            }
+        } else if (data == '@'){
+            uBit.display.print("load");               
+            displayProgamMenu();
+        }else  if (data > 0) {    
                 uBit.display.print("~");               
                 keyConversion(data);
-            }
+            
             
         }
     
 }
+
+
+
+
+
 int main() {
     
         //init
-	uBit.init();
+	uBit.init();        
         uBit.display.print("Calliope goes ZX81");
         uBit.serial.send("Z80 Reset\r\n");
-        Z80Reset(&state);
+        Z80Reset(&state);       
         uBit.serial.send("starting ZX81 Emulator...\r\n");
         for(int i=0;i<8;i++) kbd_table[i]=0xff;
-        //load_prog();
+        
+        
         while(1){
+          if(dumpmode){
+            //no computeing while dumping ram
+            keyboardLoop();    
+            uBit.rgb.setColour(0, 255, 0, 25);
+            
+          }else {
             //indicates active shift
             if (shift){
                 uBit.rgb.setColour(255, 0, 0, 25);
@@ -294,11 +377,16 @@ int main() {
             displayLoop();
             keyboardLoop();
             for(int i=0;i<10;i++){
-                emulationLoop();                       
+                emulationLoop();            
+                //char deboun=0;
+                //Z80_READ_BYTE(0x4027,deboun);
+                //if(deboun == 0){                
+                    //break;
+                //}
             }
             //clear keyboard
             for(int i=0;i<8;i++) kbd_table[i]=0xff;
-            
+          }                    
         }
 }
         

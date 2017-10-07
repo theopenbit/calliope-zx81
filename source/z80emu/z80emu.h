@@ -15,7 +15,6 @@ extern "C" {
 #endif
 
 
-//#include "MicroBit.h"
    
 
 /* Define or comment the following macros to control the features implemented
