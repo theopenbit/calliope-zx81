@@ -1,0 +1,204 @@
+//PlantUML needs graphiz installed
+:revealjsdir: ../resources/reveal.js
+:revealjs_theme: simple
+:revealjs_progress: true
+:revealjs_slideNumber: true
+:imagesdir: ../resources
+:customcss: ../resources/overwrite.css
+:graphvizdot: /usr/bin/dot
+:name: theOpenBit
+:at: &#64;
+:dot: &#46;
+:email: tob{at}schoenesnetz{dot}de
+:pdate: 20.10.2017
+
+
+= Calliope mini goes ZX81
+
+[cols="2",frame="none",grid="none",options="compact"]
+[.noborder]
+|===
+|image:mini_board.png[calliope mini,316,220, link="https://calliope.cc"] + 
+[.small]#(C)cc-by-sa https://calliope.cc#
+|image:Sinclair-ZX81.jpg[zx81,316,180, link="https://upload.wikimedia.org/wikipedia/commons/8/8c/Sinclair-ZX81.jpg"] +
+[.small]#(C)cc-by-sa 3.0 commons.wikimedia.org#
+|===
+
+{name} {email} +
+{pdate}
+
+== Historie
+
+Im Jahr 1981, also vor 36 Jahren  brachte die Firma Sinclair den Homecomputer ZX81 auf den Markt.
+Das war einer der ersten Homecomputer überhaupt!
+
+Es gab keine Smartphones, kein Internet nur Fernsehen und Radio.
+
+[cols="2",frame="none",grid="none",options="compact"]
+[.noborder]
+|===
+| So sah der ZX81 aus:
+| So sah das Fernsehbild aus:
+
+|image:Sinclair-ZX81.jpg[zx81,316,180, link="https://upload.wikimedia.org/wikipedia/commons/8/8c/Sinclair-ZX81.jpg"] +
+[.small]#(C)cc-by-sa 3.0 commons.wikimedia.org#
+| image:zx81_kong.png[zx81screenshot,316,180] +
+[.small]#Quelle: http://chordian.net#
+|===
+
+== Wie arbeitet ein Computer?
+. Es gibt einen Prozessor (CPU) +
+Dieser kennt Befehle mit denen man Daten (Zahlen) verändern kann.
+. Ein Programm ist eine Auflistung der Befehle, die ein Prozessor versteht. 
+Die Auflistung hat den Zweck, die Daten in gewünschter Weise zu verändern. 
+Beispielsweise zwei Zahlen miteinander zu addieren.
+. Es gibt einen Speicher (RAM). Das ist eine Art Notizblock. 
+Auf diesen kann man das Ergebnis eines Befehls schreiben. 
+Auf dem Notizblock kann aber auch das Programm geschrieben werden, das der Prozessor abarbeiten soll.
+
+
+== Wie arbeitet ein Computer? - bildlich
+[graphviz, "cpu-ram", "svg"]
+----
+digraph  cpuram { 
+graph [pad=".75", ranksep="0.015",nodesep="0.05", fontname="FreeSans",fontsize="20"];
+    node [shape=box, fontname="FreeSans",fontsize="20",shape=record,width=1];
+    edge [fontname="FreeSans",fontsize="20"];  
+    rankdir=LR;   
+    compound=true;
+    CPU [with = 2, height=3]
+    subgraph cluster_ram { 
+        graph[shape=cylinder,label="Speicher"]
+        node[width=2] 
+        subgraph cluster_prg{ 
+           label = "Befehle" 
+           
+           style =dashed
+           node [shape=plaintext];
+           cmd1 [label = "a=1+1\l",height=0.2];
+           cmd2 [label = "b=1+a\l",height=0.2];
+                 
+        }
+        subgraph cluster_erg{ 
+           label = "Ergebnisse"            
+           style =dashed
+           node [shape=plaintext];           
+           erg1 [label = "a=2\l"];
+           erg2 [label = "b=3\l"];
+           
+        }
+        
+    }
+    CPU -> cmd1  [label="1. liest Befehl"];
+    CPU -> erg1  [label="2. schreibt Ergebnis"];
+    CPU -> cmd2  [label="3. liest Befehl"];
+    CPU -> erg2  [label="4. schreibt Ergebnis"];
+    
+    
+}
+----
+Jeder Prozessor (CPU) hat festgelegte Befehle, die er versteht. 
+
+== Und der ZX81?
+So hat auch schon damals der ZX81 gearbeitet, aber:
+
+* Es gibt sehr viele unterschiedliche Prozessoren 
+* Jeder Prozessor kennt unterschiedliche Befehle. 
+
+Deshalb verstehen heutige Computer nicht mehr die Programme für den ZX81.
+
+== Und was hat das mit dem Calliope zu tun?
+
+Die Leistungsfähigkeit des ZX81 war so gering, dass selbst der kleine Calliope „so tun kann“ als
+ ob er ein Prozessor für den ZX81 sei. 
+
+Dafür läuft auf dem Calliope ein Programm, 
+dass die Befehle der Prozessors versteht, der im ZX81 eingebaut war. 
+Man nennt dies „emulieren“. 
+Dadurch ist es möglich, die Programme des ZX81 wieder laufen zu lassen und 
+auch neue Programme wie vor 36 Jahren zu erstellen
+
+Das sieht dann so aus...
+
+== Calliope emuliert ZX81
+
+[graphviz, "calliope-cpu-ram", "svg"]
+----
+digraph  calliopecpuram { 
+graph [pad=".75", ranksep="0.015",nodesep="0.05", fontname="FreeSans",fontsize="20"];
+    node [shape=box, fontname="FreeSans",fontsize="20",shape=record,width=1];
+    edge [fontname="FreeSans",fontsize="20"];      
+    rankdir=LR;   
+
+    compound=true;
+    CalliopeCPU [label="Calliope\nCPU",with = 2, height=3]
+    subgraph cluster_callioperam{
+        graph[label="Calliope\nSpeicher"]
+        ZX81CPU [label="ZX81\nCPU\nals Programm\n für Calliope",with = 2, height=4]
+          
+        subgraph cluster_zx81ram { 
+    
+
+            graph[label="ZX81\nSpeicher"]
+            node[width=2] 
+             subgraph cluster_zx81erg{ 
+              label = "Ergebnisse"
+              style =dashed
+              node [shape=plaintext];                         
+              erg2 [label = "b=3\l"];
+              erg1 [label = "a=2\l"];
+            
+            }
+            subgraph cluster_zx81prg{ 
+            label = "Befehle" 
+            style =dashed
+            node [shape=plaintext];
+            cmd2 [label = "b=1+a\l",height=0.2];
+            cmd1 [label = "a=1+1\l",height=0.2];
+            
+              
+
+            }
+           
+            
+       
+           
+        }
+              
+        ZX81CPU -> cmd1  [label="1. liest Befehl"];
+        ZX81CPU -> erg1  [label="2. schreibt Ergebnis"];
+        ZX81CPU -> cmd2  [label="3. liest Befehl"];
+        ZX81CPU -> erg2  [label="4. schreibt Ergebnis"];
+    }
+    CalliopeCPU -> ZX81CPU [label="führt Befehle aus Programm aus"] 
+  
+  
+    
+}
+
+----
+
+== Wie emuliert der Calliope den ZX81?
+
+* Die Programme für den ZX81 werden in den Speicher des Calliope gelegt
+* Anschließend wird das Programm zum Emulieren des ZX81 Prozessors gestartet
+* dieses liest den ersten Befehl des ZX81-Programms und übersetzt ihn in einen Befehl des Calliope
+* Das Ergebnis des Befehls wird durch das "ZX81-Prozessor-Programm" in den Speicher des Calliope geschrieben. 
+* Dabei merkt das ausgeführte ZX81-Programm gar nicht, dass es sich bei dem Speicher um den des Calliope handelt
+
+probier es aus und schreibe ein ZX81-Programm...
+
+== Die Tastatur des ZX81
+
+image:zx81keyboard.jpg[zx81keyboard,  912,362,link=https://commodore64crap.files.wordpress.com/2012/08/zx81keyboard.jpg]
+[.small]#Quelle: commodore64crap.wordpress.com#
+
+== Bedienung des Emulators
+
+* Die Shift-Taste der ZX81-Tastatur liegt auf der Taste ```#```. 
+** Sie bleibt so lange aktiv, bis sie ein zweites Mal gedrückt wird
+** Ist Shift gedrückt leuchtet der Callipoe rot
+* mit der Taste ```@``` erscheint eine Auswahl zum Laden von ZX81-Programmen
+** Das gewählte Program wird durch den ```Load```-Befehl gestartet
+** ```LOAD ""``` also die Tastenfolge `# j p p # ENTER`
+

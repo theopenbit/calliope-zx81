@@ -10,3 +10,14 @@
 * this is the used zx81 basic interpreter: https://sourceforge.net/projects/sebasic/
 * use key '^' if you want to dump the program memory on screen. 
 * using key '@' will open a menu for selecting buildin programs. The choosen program will be loaded by the 'LOAD ""' command
+
+# Demo
+
+Slides explaining an emulator are located in subdir ```slides```.
+The slides are compiled by following command:
+
+```
+#cd slides/de
+#bundle exec asciidoctor-revealjs -r asciidoctor-diagram slides.adoc
+```
+

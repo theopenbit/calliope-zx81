@@ -1,5 +1,6 @@
 .directory
 *.un~
+*.lock
 yotta_modules/*
 yotta_targets/*
 build/*
